@@ -1,0 +1,56 @@
+name: Validate ADK Plugin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: cd scripts && npm install
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate plugin schema
+        run: claude plugin validate .
+
+      - name: Run impact-analyzer self-test
+        run: |
+          set +e
+          node scripts/impact-analyzer.mjs scripts/impact-analyzer.mjs --json
+          code=$?
+          echo "Impact analyzer exit code: $code"
+          # 0=🟢, 1=🟡, 2=🔴 — all are valid outcomes for a smoke test.
+          # Only fail CI on exit 3+ (invalid invocation / crash).
+          if [ $code -ge 3 ]; then
+            echo "::error::Impact analyzer crashed (exit $code)"
+            exit 1
+          fi
+
+      - name: Lint hook shell scripts
+        run: |
+          sudo apt-get install -y shellcheck
+          shellcheck hooks/*.sh scripts/check-env.sh || true
+
+      - name: Run check-env (expect exit 1 in CI, no secrets)
+        run: |
+          set +e
+          bash scripts/check-env.sh
+          code=$?
+          if [ $code -ne 1 ]; then
+            echo "::error::check-env.sh should exit 1 when required vars missing (got $code)"
+            exit 1
+          fi
+          echo "✅ check-env.sh correctly reports missing env vars"
