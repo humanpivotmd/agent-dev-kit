@@ -1,0 +1,13 @@
+{
+  "name": "@adk/impact-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "adk-impact": "./impact-analyzer.mjs"
+  },
+  "dependencies": {
+    "madge": "^8.0.0",
+    "ts-morph": "^24.0.0"
+  }
+}
