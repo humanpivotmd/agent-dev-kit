@@ -1,0 +1,31 @@
+{
+  "name": "adk-pipeline",
+  "description": "Agent Development Kit — spec→plan→build→test→review→ship pipeline with designer/checker/implementer/verifier subagents, PreToolUse/PostToolUse hooks, and AST-based impact analysis",
+  "version": "1.0.0",
+  "author": {
+    "name": "marketing-saas team"
+  },
+  "keywords": ["workflow", "safety", "impact-analysis", "adk"],
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "postgres-readonly": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL_READONLY}"]
+    },
+    "claude-context": {
+      "command": "npx",
+      "args": ["-y", "@zilliz/claude-context-mcp"],
+      "env": {
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "MILVUS_ADDRESS": "${MILVUS_ADDRESS}"
+      }
+    }
+  }
+}

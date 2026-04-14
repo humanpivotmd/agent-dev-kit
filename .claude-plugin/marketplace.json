@@ -1,0 +1,21 @@
+{
+  "name": "adk-marketplace",
+  "owner": {
+    "name": "marketing-saas team"
+  },
+  "metadata": {
+    "description": "Agent Development Kit — spec→plan→build→test→review→ship pipeline with 4-agent safety (designer/checker/implementer/verifier), deterministic hooks, and AST-based impact analysis",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "adk-pipeline",
+      "source": "./",
+      "description": "Full ADK: 7 workflow skills + 7 subagents + deterministic hooks + impact-analyzer",
+      "version": "1.0.0",
+      "category": "workflow",
+      "keywords": ["workflow", "safety", "impact-analysis", "pipeline"],
+      "strict": true
+    }
+  ]
+}
