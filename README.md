@@ -95,6 +95,31 @@ claude
 
 ---
 
+## 🪟 Windows 환경 설정
+
+이 키트의 훅 스크립트(`hooks/*.sh`)는 bash 기반입니다.
+Windows에서는 반드시 아래 중 하나가 필요합니다.
+
+### Git Bash (권장)
+1. [Git for Windows](https://git-scm.com/download/win) 설치
+2. Claude Code를 Git Bash 터미널에서 실행
+3. 환경 변수 설정:
+   ```bash
+   echo 'export GITHUB_TOKEN=ghp_xxx' >> ~/.bashrc
+   echo 'export DATABASE_URL_READONLY=postgresql://...' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+### WSL2 (대안)
+- Ubuntu 서브시스템에서 실행 시 네이티브 bash 동작
+- 경로 주의: Windows 경로(`F:/...`)는 `/mnt/f/...`로 변환 필요
+
+### PowerShell 미지원
+- `hooks/*.sh`는 PowerShell에서 직접 실행 불가
+- PowerShell 네이티브 지원은 P2 로드맵에 포함
+
+---
+
 ## 📂 Structure
 
 ```
