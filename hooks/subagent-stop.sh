@@ -7,9 +7,14 @@ set -euo pipefail
 
 # shellcheck source=./lib/metrics.sh
 source "$(dirname "$0")/lib/metrics.sh"
+# shellcheck source=./lib/checkpoint.sh
+source "$(dirname "$0")/lib/checkpoint.sh"
 
 INPUT=$(cat)
 adk_log subagent_stop
+
+# Save a checkpoint marker — "implementer finished" is a natural skill boundary
+adk_checkpoint_save "implementer"
 
 COUNTER_DIR="${TMPDIR:-/tmp}/adk-${CLAUDE_SESSION_ID:-default}"
 if [[ -d "$COUNTER_DIR" ]]; then
