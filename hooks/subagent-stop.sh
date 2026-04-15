@@ -4,7 +4,12 @@
 # and injects a reminder about the verifier step.
 
 set -euo pipefail
+
+# shellcheck source=./lib/metrics.sh
+source "$(dirname "$0")/lib/metrics.sh"
+
 INPUT=$(cat)
+adk_log subagent_stop
 
 COUNTER_DIR="${TMPDIR:-/tmp}/adk-${CLAUDE_SESSION_ID:-default}"
 if [[ -d "$COUNTER_DIR" ]]; then

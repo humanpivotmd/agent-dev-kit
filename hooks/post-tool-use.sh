@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# shellcheck source=./lib/metrics.sh
+source "$(dirname "$0")/lib/metrics.sh"
+
 INPUT=$(cat)
 FILE_PATH=$(printf '%s' "$INPUT" | node -e "
 try {
@@ -68,6 +71,8 @@ if command -v npx >/dev/null 2>&1 && [[ -f ".eslintrc.json" || -f "eslint.config
 fi
 
 if [[ -n "$TSC_OUT" || -n "$LINT_OUT" || -n "$PAGE_SIZE_OUT" ]]; then
+  [[ -n "$PAGE_SIZE_OUT" ]] && adk_log oversize_blocked file_path="$FILE_PATH"
+  [[ -n "$TSC_OUT" || -n "$LINT_OUT" ]] && adk_log post_tool_failed file_path="$FILE_PATH"
   REASON=$(printf 'Post-write checks failed for %s' "$FILE_PATH")
   CONTEXT=$(printf 'Page size:\n%s\n\nTypecheck:\n%s\n\nLint:\n%s\n' "$PAGE_SIZE_OUT" "$TSC_OUT" "$LINT_OUT")
   # Use node for safe JSON escaping
@@ -88,6 +93,7 @@ fi
 
 # Non-blocking grandfathered warning — inject context, allow the edit.
 if [[ -n "$PAGE_SIZE_WARN" ]]; then
+  adk_log oversize_warned file_path="$FILE_PATH"
   node -e "
     const warn = process.argv[1];
     console.log(JSON.stringify({

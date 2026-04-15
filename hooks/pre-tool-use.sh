@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# shellcheck source=./lib/metrics.sh
+source "$(dirname "$0")/lib/metrics.sh"
+
 INPUT=$(cat)
 FILE_PATH=$(printf '%s' "$INPUT" | node -e "
 try {
@@ -19,6 +22,7 @@ if [[ -f "$HIGH_RISK_FILE" && -n "$FILE_PATH" ]]; then
   BASENAME=$(basename "$FILE_PATH")
   if grep -q "🔴.*${BASENAME}\|${BASENAME}.*🔴" "$HIGH_RISK_FILE" 2>/dev/null; then
     if [[ "${ADK_ALLOW_HIGH_RISK:-0}" != "1" ]]; then
+      adk_log risk_file_blocked file_path="$FILE_PATH"
       cat <<EOF
 {
   "hookSpecificOutput": {
@@ -50,6 +54,7 @@ if ! grep -Fxq "$FILE_PATH" "$SEEN_FILE" 2>/dev/null; then
 fi
 
 if (( CURRENT > 3 )); then
+  adk_log batch_blocked file_path="$FILE_PATH" count="$CURRENT"
   cat <<EOF
 {
   "hookSpecificOutput": {
