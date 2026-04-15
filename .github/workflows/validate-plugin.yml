@@ -26,6 +26,9 @@ jobs:
       - name: Validate plugin schema
         run: claude plugin validate .
 
+      - name: Run impact-analyzer unit tests
+        run: cd scripts && npm test
+
       - name: Run impact-analyzer self-test
         run: |
           set +e
