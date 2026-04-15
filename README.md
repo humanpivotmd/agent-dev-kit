@@ -224,6 +224,21 @@ User: "add feature X"
 | 8. Project-specific paths hard-coded | `@implementer` reads `constants_path`, `types_path`, etc. from CLAUDE.md — stops if missing |
 | bonus: MCP absent | `plugin.json` inlines GitHub, Postgres (read-only), and claude-context MCP servers |
 | bonus: dangerous commands | `hooks/block-dangerous.sh` hard-denies `rm -rf`, `git push --force`, `--no-verify` |
+| bonus: forward propagation | `co-update/` 라이브러리 — 7 generic 패턴 + 11 표준 카테고리 + 학습형 사례 로거 |
+
+---
+
+## 🔄 Co-update Map (Forward Propagation Library)
+
+Impact-analyzer는 **backward** 영향 분석(이 파일을 바꾸면 누가 깨지나). Co-update Map은 **forward** 전방 확산(이 변경에 따라가야 할 다른 곳들). 둘은 서로 보완.
+
+위치: [co-update/](co-update/)
+
+- **[patterns-library.md](co-update/patterns-library.md)** — 7 generic 패턴 (admin 액션, role, status, DB 테이블, env, form, dashboard 페이지). `<placeholder>` 치환만으로 모든 Next.js + Supabase 프로젝트에 재사용.
+- **[category-taxonomy.md](co-update/category-taxonomy.md)** — 11 표준 카테고리 (`auth/role`, `db-schema`, `data-integrity`, `ui-flow`, `form`, `entry-point`, `pipeline-step`, `env-config`, `legacy-debt`, `support-burden`, `dead-code`).
+- **[setup-guide.md](co-update/setup-guide.md)** — 5분 만에 새 프로젝트에 적용하는 가이드.
+
+학습 루프: `case-logger.mjs`로 사례 누적 → 같은 카테고리 3건 도달 → `pattern-extractor.mjs`가 패턴 보강 제안 → 사용자 검토 → 라이브러리 업데이트.
 
 ---
 

@@ -56,6 +56,11 @@ for f in \
   "README.md" \
   "hooks/hooks.json" \
   "scripts/impact-analyzer.mjs" \
+  "scripts/case-logger.mjs" \
+  "scripts/pattern-extractor.mjs" \
+  "co-update/patterns-library.md" \
+  "co-update/category-taxonomy.md" \
+  "co-update/setup-guide.md" \
   "scripts/package.json"
 do
   if [ -f "$PLUGIN_ROOT/$f" ]; then
@@ -205,6 +210,30 @@ for var in OPENAI_API_KEY MILVUS_ADDRESS; do
     info "$var not set (optional — claude-context MCP)"
   fi
 done
+
+# ---------------------------------------------------------------
+section "11. Co-update Map (target project, optional)"
+# ---------------------------------------------------------------
+# Check the CWD (not plugin root) for a project that consumes the library.
+TARGET_ROOT="${ADK_TARGET_PROJECT:-$PWD}"
+if [ -d "$TARGET_ROOT/.md/co-update" ]; then
+  if [ -f "$TARGET_ROOT/.md/co-update/patterns.md" ]; then
+    ok ".md/co-update/patterns.md exists in target project"
+  else
+    warn "target project missing .md/co-update/patterns.md (see co-update/setup-guide.md)"
+  fi
+  if [ -f "$TARGET_ROOT/.md/co-update/cases.md" ]; then
+    ok ".md/co-update/cases.md exists in target project"
+  else
+    warn "target project missing .md/co-update/cases.md"
+  fi
+  # Unresolved placeholders?
+  if [ -f "$TARGET_ROOT/.md/co-update/patterns.md" ] && grep -qE '<[a-z]+_[a-z_]+>' "$TARGET_ROOT/.md/co-update/patterns.md" 2>/dev/null; then
+    warn "patterns.md still has unresolved <placeholder> tokens — run sed replacement (setup-guide Step 2)"
+  fi
+else
+  info "no .md/co-update/ in CWD — run setup-guide.md if this should be a co-update project"
+fi
 
 # ---------------------------------------------------------------
 # Summary
