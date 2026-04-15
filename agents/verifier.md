@@ -32,6 +32,21 @@ Dispatch in a **single message** (all three at once, not sequentially):
 
 Wait for all three to return.
 
+### Optional: domain reviewers (conditional)
+If the change touches Next.js / Supabase / Railway:
+- `@nextjs-reviewer`
+- `@supabase-reviewer`
+- `@railway-deploy`
+
+### NOT for product decisions
+For **product/UX decisions** (not code reviews), use the product team instead:
+- `@product-manager` — business value, user behavior assumptions
+- `@product-planner` — user scenarios, flow coverage
+- `@ux-designer` — interaction patterns, anti-friction
+- `@frontend-dev` — implementation cost, hidden coupling
+
+Product team is dispatched at **design time** (before implementation), not at verification time. See `skills/spec/SKILL.md` for how to invoke them.
+
 ## Step 3 — Consolidate
 
 ```markdown

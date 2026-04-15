@@ -24,7 +24,15 @@ You are performing requirements definition with mandatory impact analysis. **Do 
    node "${CLAUDE_PLUGIN_ROOT}/scripts/impact-analyzer.mjs" <file>
    ```
 3. **Gather context via MCP** (if available): related GitHub issues, DB schema for affected tables
-4. **Produce the spec report** using the format below
+4. **Determine if this is a product decision or a code change**:
+   - **Code change** (bug fix, refactor, clear requirement): proceed to step 5
+   - **Product decision** (multiple paths, "should we...", trade-offs): dispatch the **product team** in parallel BEFORE step 5:
+     - `@product-manager` — challenge user behavior assumptions
+     - `@product-planner` — enumerate user scenarios
+     - `@ux-designer` — anti-friction patterns
+     - `@frontend-dev` — feasibility + cost
+   - Wait for all 4 to return → synthesize consensus → include in spec report
+5. **Produce the spec report** using the format below
 
 ## Output format
 
