@@ -5,6 +5,10 @@
 
 This directory is **both** a Claude Code plugin marketplace and the plugin itself. Install it into any project and get the full ADK workflow.
 
+> ⚠️ **모든 ADK 사용자 필독**: [AI-BEHAVIOR.md](./AI-BEHAVIOR.md) — Claude가 이 플러그인을
+> 쓸 때 반드시 따라야 할 행동 규칙 (playwright 검증 의무, "못 한다" 거짓말 금지, 패턴 매칭 등).
+> 새 프로젝트에 ADK 설치 시 프로젝트 CLAUDE.md 상단에 이 파일 링크 추가 권장.
+
 ---
 
 ## 🚀 Install
