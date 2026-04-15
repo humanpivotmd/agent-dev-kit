@@ -6,7 +6,6 @@
     "name": "marketing-saas team"
   },
   "keywords": ["workflow", "safety", "impact-analysis", "adk"],
-  "hooks": "./hooks/hooks.json",
   "mcpServers": {
     "github": {
       "command": "npx",
