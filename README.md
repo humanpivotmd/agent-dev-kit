@@ -114,9 +114,24 @@ Windows에서는 반드시 아래 중 하나가 필요합니다.
 - Ubuntu 서브시스템에서 실행 시 네이티브 bash 동작
 - 경로 주의: Windows 경로(`F:/...`)는 `/mnt/f/...`로 변환 필요
 
-### PowerShell 미지원
-- `hooks/*.sh`는 PowerShell에서 직접 실행 불가
-- PowerShell 네이티브 지원은 P2 로드맵에 포함
+### PowerShell 네이티브 지원 (v1.2+)
+`hooks/ps/*.ps1`에 PowerShell 포팅 버전이 포함되어 있습니다. 활성화:
+
+```bash
+# 기본은 bash (hooks/hooks.json). PowerShell로 전환하려면:
+cp hooks/hooks-powershell.json hooks/hooks.json
+```
+
+그 후 Claude Code 재시작. 기능 parity는 bash 버전과 동일:
+- metrics.ps1 → 동일한 JSONL 포맷
+- pre-tool-use.ps1 → 3-파일 배치 카운터, 🔴 파일 차단
+- post-tool-use.ps1 → 200줄 제한, typecheck, lint
+- block-dangerous.ps1 → rm -rf / force push / --no-verify
+- session-start/stop, subagent-stop 동일
+
+**PowerShell 실행 정책**: 스크립트는 `-ExecutionPolicy Bypass`로 호출되므로 사용자가 별도 정책 변경할 필요 없음.
+
+**Windows Native PowerShell vs pwsh (Core)**: 둘 다 동작. `hooks-powershell.json`은 `powershell` 명령을 사용 (Windows 기본 설치). `pwsh`를 선호하면 JSON에서 `powershell` → `pwsh`로 치환.
 
 ---
 
