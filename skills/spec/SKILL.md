@@ -28,6 +28,11 @@ You are performing requirements definition with mandatory impact analysis. **Do 
 
 ## Output format
 
+Use the structure in [`templates/spec-report.md`](./templates/spec-report.md).
+Copy the template, fill each section, and delete the bracketed instructions
+before presenting to the user. The template is the source of truth — this
+section below is a summary for reference.
+
 ```markdown
 ## Spec Report: <feature>
 

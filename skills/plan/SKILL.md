@@ -24,6 +24,10 @@ You are breaking an approved spec into atomic, executable units. **Do not write 
 
 ## Output format
 
+Use the structure in [`templates/plan.md`](./templates/plan.md). Copy the
+template, fill each row, and delete the bracketed instructions before
+presenting to the user.
+
 ```markdown
 ## Plan: <feature>
 

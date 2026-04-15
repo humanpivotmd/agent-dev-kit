@@ -21,6 +21,11 @@ You orchestrate **three parallel subagents** and consolidate findings.
 
 ## Output
 
+Use the structure in [`templates/verify.md`](./templates/verify.md). This
+template assumes `@code-reviewer`, `@test-runner`, `@security-scanner` have
+all returned, and optionally includes `@nextjs-reviewer`, `@supabase-reviewer`,
+`@railway-deploy` when the change touches those domains.
+
 ```markdown
 ## Review summary
 
