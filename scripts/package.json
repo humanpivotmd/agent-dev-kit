@@ -6,6 +6,9 @@
   "bin": {
     "adk-impact": "./impact-analyzer.mjs"
   },
+  "scripts": {
+    "test": "node --test test/impact-analyzer.test.mjs"
+  },
   "dependencies": {
     "madge": "^8.0.0",
     "ts-morph": "^24.0.0"
