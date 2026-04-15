@@ -52,6 +52,8 @@ const counts = {};
 const byDay = {};
 const sessions = new Set();
 const riskFilesHit = {};
+const retryHits = {};   // file_path → count of post_tool_failed events
+const oversizeHits = {}; // file_path → count of oversize_blocked events
 
 for (const e of filtered) {
   counts[e.event] = (counts[e.event] || 0) + 1;
@@ -60,6 +62,12 @@ for (const e of filtered) {
   if (e.session_id) sessions.add(e.session_id);
   if (e.event === 'risk_file_blocked' && e.file_path) {
     riskFilesHit[e.file_path] = (riskFilesHit[e.file_path] || 0) + 1;
+  }
+  if (e.event === 'post_tool_failed' && e.file_path) {
+    retryHits[e.file_path] = (retryHits[e.file_path] || 0) + 1;
+  }
+  if (e.event === 'oversize_blocked' && e.file_path) {
+    oversizeHits[e.file_path] = (oversizeHits[e.file_path] || 0) + 1;
   }
 }
 
@@ -99,6 +107,11 @@ const report = {
   avgDuration: fmtDuration(avgDurationMs),
   counts,
   topRiskFiles: Object.entries(riskFilesHit).sort((a, b) => b[1] - a[1]).slice(0, 5),
+  topRepeatFailures: Object.entries(retryHits)
+    .filter(([, n]) => n >= 2)  // ≥2 = actual repeat, not one-off
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10),
+  topOversizeFiles: Object.entries(oversizeHits).sort((a, b) => b[1] - a[1]).slice(0, 5),
   byDay,
 };
 
@@ -134,6 +147,23 @@ if (report.topRiskFiles.length > 0) {
   console.log('\n## Top 🔴 risk files attempted');
   for (const [file, count] of report.topRiskFiles) {
     console.log(`- ${file}: ${count}`);
+  }
+}
+
+if (report.topRepeatFailures.length > 0) {
+  console.log('\n## Top repeat failures (post_tool_failed ≥2)');
+  console.log('Files where typecheck/lint kept failing after Write/Edit.');
+  console.log('Watch for stuck implementer loops here.');
+  for (const [file, count] of report.topRepeatFailures) {
+    const marker = count >= 5 ? '🔴' : count >= 3 ? '🟡' : '⚠️';
+    console.log(`- ${marker} ${file}: ${count}회`);
+  }
+}
+
+if (report.topOversizeFiles.length > 0) {
+  console.log('\n## Top oversize block files (page.tsx >200 lines)');
+  for (const [file, count] of report.topOversizeFiles) {
+    console.log(`- ${file}: ${count}회 차단`);
   }
 }
 
