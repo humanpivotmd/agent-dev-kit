@@ -62,3 +62,29 @@ test('5. self-reference is filtered out (shared.ts not its own caller)', () => {
     `shared.ts found in its own caller list: ${selfReference}`
   );
 });
+
+test('6. security-critical keyword (auth) triggers risk boost', () => {
+  const r = runAnalyzer('src/auth.ts', '--json');
+  assert.ok(
+    r.status === 0 || r.status === 1 || r.status === 2,
+    `expected 0/1/2 exit, got ${r.status}. stderr: ${r.stderr}`
+  );
+  const json = JSON.parse(r.stdout);
+  // auth.ts has 0 callers but the SECURITY_KEYWORDS check must still fire
+  assert.equal(
+    json.ast.uniqueCallerCount,
+    0,
+    `fixture auth.ts should have 0 callers, got ${json.ast.uniqueCallerCount}`
+  );
+  // Risk score must include the security reason
+  const securityReason = json.risk.reasons.find((r) => r.includes('Security-critical keyword'));
+  assert.ok(
+    securityReason,
+    `expected security-critical reason, got: ${JSON.stringify(json.risk.reasons)}`
+  );
+  // Score must be at least 3 (from SECURITY_KEYWORDS alone)
+  assert.ok(
+    json.risk.score >= 3,
+    `expected score >= 3 from security heuristic, got ${json.risk.score}`
+  );
+});

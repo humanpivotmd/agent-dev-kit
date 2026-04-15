@@ -173,9 +173,23 @@ function scoreRisk({ ast, graph }) {
 
   // Path heuristics — core/shared/lib paths are riskier
   const rel = relative(projectRoot, targetAbs);
-  if (/\b(lib|shared|core|constants|types|auth|api)\b/.test(rel)) {
+  if (/\b(lib|shared|core|constants|types|api)\b/.test(rel)) {
     score += 2;
     reasons.push(`Path heuristic: shared/core module`);
+  }
+
+  // Security-critical keyword heuristic (ported from md/ router.py HIGH_RISK_KEYWORDS)
+  // File paths touching auth/secrets/crypto should always trigger extra caution,
+  // even if fan-in is low — these files are low-fan-in-but-high-blast-radius.
+  const relLower = rel.toLowerCase();
+  const SECURITY_KEYWORDS = [
+    'auth', 'secret', 'password', 'token', 'crypto',
+    'credential', 'encrypt', 'session', 'jwt',
+  ];
+  const matchedSecurity = SECURITY_KEYWORDS.filter(kw => relLower.includes(kw));
+  if (matchedSecurity.length > 0) {
+    score += 3;
+    reasons.push(`Security-critical keyword in path: ${matchedSecurity.join(', ')}`);
   }
 
   const level = score >= 6 ? '🔴' : score >= 3 ? '🟡' : '🟢';
