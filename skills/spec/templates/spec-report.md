@@ -65,6 +65,23 @@ delete bracketed instructions before handing to the user.
 - [Risk 1, with mitigation]
 - [Risk 2, with mitigation]
 
+### Recommended model
+[Pick one based on task complexity + risk keywords in the request.
+Ported from md/router.py HIGH_RISK_KEYWORDS heuristic.]
+
+| Condition | Recommended model | Why |
+|---|---|---|
+| Task mentions auth/secret/password/crypto/token/encrypt | **Opus** | Security-critical — use the strongest reasoner |
+| 10+ files expected OR schema/migration work | **Sonnet** | Default workhorse, handles multi-file edits |
+| Simple text/style/typo change | **Haiku** | Fast and cheap |
+| Default (unsure) | **Sonnet** | Safe middle ground |
+
+**Detected keywords in this task**: [list matched security keywords, or "none"]
+**Detected scope**: [N files, DB changes yes/no]
+**Recommendation**: [Opus / Sonnet / Haiku]
+
+If user wants to switch: restart Claude Code with `claude --model <name>`.
+
 ### User confirmation required
 [List any decisions the user must make before proceeding. Number them.]
 

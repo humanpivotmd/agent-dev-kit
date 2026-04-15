@@ -76,6 +76,11 @@ section below is a summary for reference.
 ### Estimated scope
 - Files: N  |  Est. time: X
 
+### Recommended model
+- Detected keywords: [list or "none"]
+- Recommendation: [Opus / Sonnet / Haiku] — [reason]
+  (Rules: security keywords → Opus, 10+ files → Sonnet, simple change → Haiku)
+
 ### Proposed modification order
 1. [file] — reason
 2. ...
