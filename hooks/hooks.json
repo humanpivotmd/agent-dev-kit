@@ -1,4 +1,24 @@
 {
+  "SessionStart": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh\""
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-stop.sh\""
+        }
+      ]
+    }
+  ],
   "PreToolUse": [
     {
       "matcher": "Write|Edit",
