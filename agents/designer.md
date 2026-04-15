@@ -21,28 +21,67 @@ You are the design agent. Your job is to convert a feature request into a risk-g
 - Run `node ${CLAUDE_PLUGIN_ROOT}/scripts/impact-analyzer.mjs <file>` on each candidate
 - Grade each file 🔴 (core/shared/DB), 🟡 (business logic), 🟢 (leaf/UI)
 
-### Step 2 — Forward impact (Co-update Map check)
+### Step 2 — Forward impact (Co-update Map check + 사례 학습)
 This step prevents the "I added X but forgot to update Y" problem.
 
-1. **Read the project's CLAUDE.md** and locate the **🔄 Co-update Map** section.
-   If it doesn't exist, skip this step but **flag it** in the report so the
-   user knows forward-propagation isn't being checked.
+#### 2a. Read patterns + cases (둘 다 필수)
 
-2. **Pattern matching**: For each pattern in the Co-update Map, ask:
+1. **Read the project's CLAUDE.md** and find references to:
+   - `.md/co-update/patterns.md` (general rules)
+   - `.md/co-update/cases.md` (incident log)
+
+2. **Read both files**:
+   - `patterns.md` — for matching general rules
+   - `cases.md` — for finding similar past incidents
+
+3. If neither file exists, **flag it** in the report so the user knows
+   forward-propagation isn't being checked.
+
+#### 2b. Pattern matching (patterns.md)
+
+1. For each pattern in `patterns.md`, ask:
    - Does the user's request trigger this pattern?
    - Trigger phrases: "새 X 추가", "추가해줘", "만들어줘", "지원하게 해줘"
    - File-shape matching: if the request implies a new file matching the
      pattern's "트리거" path, the pattern matches.
 
-3. **For each matched pattern**, list ALL items from "같이 확인할 곳" column
-   in the spec report's new **"Co-update items (forward propagation)"** section.
+2. **Multiple patterns can match simultaneously**. Don't stop at the first match.
+   Examples: "draft-info에 영상 채널 추가" matches both pattern 8 (진입점) and
+   pattern 9 (파이프라인 단계).
 
-4. **For each co-update item**, give one of three answers:
+3. For each matched pattern, list ALL items from "같이 확인할 곳" column
+   in the spec report's **"Co-update items (forward propagation)"** section.
+
+#### 2c. Case search (cases.md)
+
+1. Search `cases.md` for cases that share:
+   - Same matched pattern number(s)
+   - Same category tag
+   - Similar description keywords
+
+2. Include up to 5 most relevant cases in the spec report under
+   **"유사 사례 (cases.md)"** section. Format:
+   ```
+   - Case #NNN — <한 줄 제목> — 카테고리: <태그>
+     해결: <commit sha>
+   ```
+
+3. **If the user's current request looks like a NEW failure case** (the matched
+   pattern doesn't fully cover it), explicitly note this and suggest logging
+   to cases.md after resolution:
+   ```bash
+   node "F:/marketing -app/agent-dev-kit/scripts/case-logger.mjs" \
+     "<description>" --pattern=N --commit=<sha> --category=<tag>
+   ```
+
+#### 2d. Co-update item decisions
+
+1. For each co-update item from matched patterns, give one of three answers:
    - **필요** — must be done in this work
    - **불필요** — definitely not needed (explain why)
    - **사용자 결정 필요** — depends on product judgment, ask the user
 
-5. **Never assume "불필요" without reason**. If unsure, default to "사용자 결정 필요".
+2. **Never assume "불필요" without reason**. If unsure, default to "사용자 결정 필요".
 
 ### Step 3 — Risk grading
 - Combine backward + forward impact into the risk score
