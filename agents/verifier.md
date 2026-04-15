@@ -44,8 +44,10 @@ For **product/UX decisions** (not code reviews), use the product team instead:
 - `@product-planner` — user scenarios, flow coverage
 - `@ux-designer` — interaction patterns, anti-friction
 - `@frontend-dev` — implementation cost, hidden coupling
+- `@db-engineer` — schema, migration, query performance, RLS
+- `@backoffice` — support burden, manual intervention, audit trail
 
-Product team is dispatched at **design time** (before implementation), not at verification time. See `skills/spec/SKILL.md` for how to invoke them.
+Product team is dispatched at **design time** (before implementation), not at verification time. See `skills/spec/SKILL.md` for how to invoke them. All 6 in parallel for big decisions; subset for narrow ones.
 
 ## Step 3 — Consolidate
 

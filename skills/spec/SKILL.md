@@ -31,7 +31,13 @@ You are performing requirements definition with mandatory impact analysis. **Do 
      - `@product-planner` — enumerate user scenarios
      - `@ux-designer` — anti-friction patterns
      - `@frontend-dev` — feasibility + cost
-   - Wait for all 4 to return → synthesize consensus → include in spec report
+     - `@db-engineer` — schema, migration, query performance, RLS
+     - `@backoffice` — support burden, manual intervention, audit trail
+   - Wait for all 6 to return → synthesize consensus → include in spec report
+   - **Conditional dispatch**: skip agents that are clearly not relevant
+     (e.g., pure CSS change → only `@ux-designer` + `@frontend-dev`)
+     (e.g., schema change → `@db-engineer` + `@backoffice` + `@frontend-dev`)
+     (e.g., full feature → all 6)
 5. **Produce the spec report** using the format below
 
 ## Output format
