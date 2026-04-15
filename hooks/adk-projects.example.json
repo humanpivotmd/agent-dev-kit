@@ -1,0 +1,13 @@
+{
+  "_comment": "Cross-project rules config for UserPromptSubmit hook. Copy to ~/.claude/adk-projects.json and edit. When Claude Code runs from a non-project CWD, the hook scans each user prompt for the patterns below and, on match, loads active rules from the matched project's path. Patterns are plain substrings (case-sensitive).",
+  "projects": [
+    {
+      "path": "F:/marketing -app/marketing-saas-v2",
+      "patterns": [
+        "marketing-saas-v2",
+        "marketing -app/marketing-saas-v2",
+        "localhost:3000"
+      ]
+    }
+  ]
+}

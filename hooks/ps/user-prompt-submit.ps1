@@ -1,5 +1,10 @@
 # UserPromptSubmit hook — PowerShell version.
 # Injects short rules/state summary as additionalContext.
+#
+# Cross-project fallback: if $projectRoot has no .md/rules/active.md,
+# read ~/.claude/adk-projects.json and pattern-match the prompt to detect
+# which project the user is working on, even when Claude Code runs from
+# a non-project CWD.
 
 $ErrorActionPreference = "Continue"
 . "$PSScriptRoot/lib/metrics.ps1"
@@ -8,7 +13,52 @@ Adk-Log -Event "user_prompt_submit"
 
 $projectRoot = if ($env:CLAUDE_PROJECT_DIR) { $env:CLAUDE_PROJECT_DIR } else { (Get-Location).Path }
 
+# Read stdin (Claude Code passes {"prompt": "..."} JSON)
+$stdinJson = ""
+if (-not [Console]::IsInputRedirected -eq $false) {
+  try { $stdinJson = [Console]::In.ReadToEnd() } catch {}
+}
+
+$promptText = ""
+if ($stdinJson) {
+  try {
+    $parsed = $stdinJson | ConvertFrom-Json
+    if ($parsed.prompt) { $promptText = [string]$parsed.prompt }
+  } catch {}
+}
+
+# Cross-project detection
+$detectedViaPattern = ""
+$activeCheck = Join-Path $projectRoot ".md/rules/active.md"
+if (-not (Test-Path $activeCheck) -and $promptText) {
+  $configPath = Join-Path $env:USERPROFILE ".claude/adk-projects.json"
+  if (Test-Path $configPath) {
+    try {
+      $cfg = Get-Content $configPath -Raw | ConvertFrom-Json
+      foreach ($p in $cfg.projects) {
+        foreach ($pat in $p.patterns) {
+          if ($pat -and $promptText.Contains($pat)) {
+            $candidate = $p.path
+            if ($candidate -and (Test-Path (Join-Path $candidate ".md/rules/active.md"))) {
+              $projectRoot = $candidate
+              $detectedViaPattern = $candidate
+            }
+            break
+          }
+        }
+        if ($detectedViaPattern) { break }
+      }
+    } catch {}
+  }
+}
+
 $parts = @()
+
+if ($detectedViaPattern) {
+  $parts += "📍 Cross-project rules loaded from: $detectedViaPattern"
+  $parts += "(CWD is outside project — pattern-matched from prompt)"
+  $parts += ""
+}
 
 # 1. Active rules
 $activeFile = Join-Path $projectRoot ".md/rules/active.md"

@@ -6,6 +6,12 @@
 #   1. ${PROJECT_ROOT}/.md/rules/active.md        — 10-line always-on rules
 #   2. ${PROJECT_ROOT}/.md/co-update/cases.md     — category threshold alerts
 #   3. ${PROJECT_ROOT}/.md/rules/danger-files.md  — 🔴 files list (first section)
+#
+# Cross-project fallback:
+#   If $PROJECT_ROOT has no .md/rules/active.md, read ~/.claude/adk-projects.json
+#   and scan the user prompt for pattern matches. On match, override PROJECT_ROOT
+#   to the matched project's path so rules are still injected even when Claude Code
+#   runs from a non-project CWD (e.g. user's home directory).
 
 set -uo pipefail
 # shellcheck source=./lib/metrics.sh
@@ -16,7 +22,57 @@ adk_log user_prompt_submit 2>/dev/null || true
 # CWD is the project root when Claude Code runs hooks
 PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-$PWD}"
 
+# Read stdin (Claude Code passes {"prompt": "..."} JSON)
+STDIN_JSON=""
+if ! [ -t 0 ]; then
+  STDIN_JSON=$(cat)
+fi
+
+PROMPT_TEXT=""
+if [[ -n "$STDIN_JSON" ]]; then
+  PROMPT_TEXT=$(node -e '
+    try {
+      const input = JSON.parse(process.argv[1] || "{}");
+      if (input && typeof input.prompt === "string") process.stdout.write(input.prompt);
+    } catch {}
+  ' "$STDIN_JSON" 2>/dev/null || true)
+fi
+
+# Cross-project detection: if current root has no rules, try to match prompt
+DETECTED_VIA_PATTERN=""
+if [[ ! -f "$PROJECT_ROOT/.md/rules/active.md" && -n "$PROMPT_TEXT" ]]; then
+  CONFIG="${HOME}/.claude/adk-projects.json"
+  if [[ -f "$CONFIG" ]]; then
+    DETECTED=$(node -e '
+      const fs = require("fs");
+      try {
+        const cfg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+        const prompt = process.argv[2] || "";
+        for (const p of (cfg.projects || [])) {
+          for (const pat of (p.patterns || [])) {
+            if (pat && prompt.indexOf(pat) !== -1) {
+              process.stdout.write(p.path || "");
+              process.exit(0);
+            }
+          }
+        }
+      } catch {}
+    ' "$CONFIG" "$PROMPT_TEXT" 2>/dev/null || true)
+    if [[ -n "$DETECTED" && -f "$DETECTED/.md/rules/active.md" ]]; then
+      PROJECT_ROOT="$DETECTED"
+      DETECTED_VIA_PATTERN="$DETECTED"
+    fi
+  fi
+fi
+
 PARTS=()
+
+# Cross-project indicator
+if [[ -n "$DETECTED_VIA_PATTERN" ]]; then
+  PARTS+=("📍 Cross-project rules loaded from: $DETECTED_VIA_PATTERN")
+  PARTS+=("(CWD is outside project — pattern-matched from prompt)")
+  PARTS+=("")
+fi
 
 # 1. Active rules (short, curated)
 ACTIVE_RULES="$PROJECT_ROOT/.md/rules/active.md"
