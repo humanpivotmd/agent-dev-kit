@@ -88,3 +88,33 @@ test('6. security-critical keyword (auth) triggers risk boost', () => {
     `expected score >= 3 from security heuristic, got ${json.risk.score}`
   );
 });
+
+test('7. generate API route missing parseClaudeJson + preventDuplicateStep is flagged', () => {
+  const r = runAnalyzer('src/api/generate/pipeline/route.ts', '--json');
+  // Exit code may be 0/1/2 depending on accumulated risk
+  assert.ok(
+    r.status === 0 || r.status === 1 || r.status === 2,
+    `expected 0/1/2 exit, got ${r.status}. stderr: ${r.stderr}`
+  );
+  const json = JSON.parse(r.stdout);
+
+  // Must flag missing parseClaudeJson (file calls anthropic.messages.create)
+  const missingParser = json.risk.reasons.find((r) => r.includes('parseClaudeJson'));
+  assert.ok(
+    missingParser,
+    `expected parseClaudeJson warning, got: ${JSON.stringify(json.risk.reasons)}`
+  );
+
+  // Must flag missing preventDuplicateStep (path matches /pipeline/route.ts)
+  const missingGuard = json.risk.reasons.find((r) => r.includes('preventDuplicateStep'));
+  assert.ok(
+    missingGuard,
+    `expected preventDuplicateStep warning, got: ${JSON.stringify(json.risk.reasons)}`
+  );
+
+  // Combined score must be at least 4 (2 + 2 from ADK pattern checks)
+  assert.ok(
+    json.risk.score >= 4,
+    `expected score >= 4 from missing ADK patterns, got ${json.risk.score}`
+  );
+});

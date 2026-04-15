@@ -192,6 +192,39 @@ function scoreRisk({ ast, graph }) {
     reasons.push(`Security-critical keyword in path: ${matchedSecurity.join(', ')}`);
   }
 
+  // ADK pattern check — generate API routes must use parseClaudeJson + preventDuplicateStep
+  // (rules defined in CLAUDE.md → Claude 출력 검증 / SSE 중복 실행 방지)
+  // Pattern: src/app/api/generate/**/route.ts
+  const isGenerateRoute =
+    /[\\/]api[\\/]generate[\\/].*route\.(ts|tsx|js|jsx|mjs|cjs)$/.test(rel);
+  if (isGenerateRoute) {
+    try {
+      const fileContent = readFileSync(targetAbs, 'utf8');
+      const hasClaudeParser = /\bparseClaudeJson\s*\(/.test(fileContent);
+      const hasPipelineGuard = /\bpreventDuplicateStep\s*\(/.test(fileContent);
+      const callsAnthropic = /anthropic\.messages\.create|claude.*\.messages/i.test(fileContent);
+
+      if (callsAnthropic && !hasClaudeParser) {
+        score += 2;
+        reasons.push(
+          `ADK pattern: generate API calls Claude but missing parseClaudeJson() — ` +
+          `add validation per CLAUDE.md "Claude 출력 검증 규칙"`
+        );
+      }
+      // Only s5/s6/s7 routes need pipeline guard (pipeline / image-script / video-script)
+      const needsGuard = /[\\/](pipeline|image-script|video-script)[\\/]route\./.test(rel);
+      if (needsGuard && !hasPipelineGuard) {
+        score += 2;
+        reasons.push(
+          `ADK pattern: SSE route missing preventDuplicateStep() — ` +
+          `add guard per CLAUDE.md "SSE 중복 실행 방지 규칙"`
+        );
+      }
+    } catch {
+      // file read failure — non-blocking
+    }
+  }
+
   const level = score >= 6 ? '🔴' : score >= 3 ? '🟡' : '🟢';
   return { score, level, reasons };
 }
