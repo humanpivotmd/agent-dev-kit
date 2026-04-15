@@ -156,7 +156,7 @@ function scoreRisk({ ast, graph }) {
     reasons.push(`Moderate fan-in: ${ast.uniqueCallerCount} callers`);
   }
 
-  if (ast?.exports.length > 10) {
+  if ((ast?.exports?.length ?? 0) > 10) {
     score += 1;
     reasons.push(`Large public surface: ${ast.exports.length} exports`);
   }
