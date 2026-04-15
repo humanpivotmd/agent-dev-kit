@@ -10,6 +10,16 @@
       ]
     }
   ],
+  "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/ps/user-prompt-submit.ps1\""
+        }
+      ]
+    }
+  ],
   "Stop": [
     {
       "hooks": [

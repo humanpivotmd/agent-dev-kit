@@ -58,6 +58,8 @@ for f in \
   "scripts/impact-analyzer.mjs" \
   "scripts/case-logger.mjs" \
   "scripts/pattern-extractor.mjs" \
+  "hooks/user-prompt-submit.sh" \
+  "hooks/ps/user-prompt-submit.ps1" \
   "co-update/patterns-library.md" \
   "co-update/category-taxonomy.md" \
   "co-update/setup-guide.md" \
@@ -233,6 +235,22 @@ if [ -d "$TARGET_ROOT/.md/co-update" ]; then
   fi
 else
   info "no .md/co-update/ in CWD — run setup-guide.md if this should be a co-update project"
+fi
+
+# Rules directory (hook-injected context)
+if [ -d "$TARGET_ROOT/.md/rules" ]; then
+  if [ -f "$TARGET_ROOT/.md/rules/active.md" ]; then
+    ok ".md/rules/active.md exists (hook will inject it)"
+  else
+    warn "target project missing .md/rules/active.md — hook will skip active rules section"
+  fi
+  if [ -f "$TARGET_ROOT/.md/rules/danger-files.md" ]; then
+    ok ".md/rules/danger-files.md exists"
+  else
+    warn "target project missing .md/rules/danger-files.md"
+  fi
+else
+  info "no .md/rules/ in CWD — create active.md + danger-files.md for UserPromptSubmit hook"
 fi
 
 # ---------------------------------------------------------------
